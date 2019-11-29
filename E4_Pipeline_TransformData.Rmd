@@ -1,0 +1,233 @@
+---
+title: "E4_Pipeline_TransformData"
+author: "BrinnaeBent"
+date: "November 14, 2019"
+output: html_document
+---
+
+## Read in HR.csv file and transform
+```{r}
+
+df <- read.csv("filepath\\HR.csv", header=FALSE, stringsAsFactors = FALSE)
+
+
+newrow <- rep(NaN, length.out=ncol(df))
+df <- rbind(df, newrow)
+  
+  HR <- function(data){
+    E4starttime <- data[1]
+    E4 <- data[-c(1,2)]
+    E4 <- E4[1:which(is.na(data))[1]]  
+    secondspassedE4 <- which(is.na(data))[1]/data[2]
+    E4endtime <- E4starttime + secondspassedE4
+    E4Time <- as.numeric(seq(from=E4starttime, to=E4endtime, length.out=which(is.na(data))[1]))
+  
+    HR <- data.frame(E4Time, E4)
+    colnames(HR) <- c("Time", "HR")
+  
+    HR$Time = as.POSIXct(round(as.numeric(HR$Time)), origin = "1970-01-01")
+    write.table(HR, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+  }
+  
+  apply(df, 2, HR)
+
+```
+
+
+```{r}
+df <- read.csv("filepath\\IBI.csv", header=FALSE, stringsAsFactors = FALSE)
+
+for (i in seq(1, (length(df)-1), 2)){  #<- changes based on length
+  Time <- as.numeric(df[1,i] + df[,i])
+  IBI <- df[,i+1]
+  IBIdf <- data.frame(Time, IBI)
+  IBIdf <- IBIdf[-1,]
+  colnames(IBIdf) <- c("Time", "IBI")
+
+  IBIdf$Time = as.POSIXct(round(as.numeric(IBIdf$Time)), origin = "1970-01-01")
+  
+  IBIdf = na.omit(IBIdf)
+  IBIdf <- IBIdf[!(IBIdf$IBI == ""), ]
+
+  write.table(IBIdf, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}
+```
+
+
+## Read in IBI.csv file and transform
+```{r}
+df <- read.csv("filepath\IBI.csv", header=FALSE, stringsAsFactors = FALSE)
+
+
+for (i in seq(1, (length(df)-2), 2)){  #<- changes based on length
+  Time <- as.numeric(df[1,i] + df[,i])
+  IBI <- df[,i+1]
+  IBIdf <- data.frame(Time, IBI)
+  IBIdf <- IBIdf[-1,]
+  colnames(IBIdf) <- c("Time", "IBI")
+
+  IBIdf$Time = as.POSIXct(round(as.numeric(IBIdf$Time)), origin = "1970-01-01")
+  
+  IBIdf = na.omit(IBIdf)
+  IBIdf <- IBIdf[!(IBIdf$IBI == ""), ]
+
+  write.table(IBIdf, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}
+
+
+```
+
+
+## Read in ACC.csv file and transform
+## This code removes lines where one of X,Y, and Z are NA (Complete data)
+```{r}
+df <- read.csv("filepath\\ACC.csv", header=FALSE, stringsAsFactors = FALSE)
+
+    
+for (i in seq(1, (length(df)-2), 3)){  #<- changes based on length
+  
+  startTime <- df[1,i]
+  secondspassed <- (nrow(df[i])-2)/32
+  endtime <- startTime + secondspassed
+  Time <- as.numeric(seq(from=startTime, to=endtime, length.out=(nrow(df[i])-2)))
+  C1 <- df[-c(1,2),i]
+  C2 <- df[-c(1,2),i+1]
+  C3 <- df[-c(1,2),i+2]
+  
+  ACCdf <- data.frame(Time, C1, C2, C3)
+  colnames(ACCdf) <- c("Time", "X", "Y", "Z")
+
+  ACCdf$Time = as.POSIXct(round(as.numeric(ACCdf$Time)), origin = "1970-01-01")
+  
+  ACCdf = na.omit(ACCdf)
+
+  write.table(ACCdf, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}
+
+
+```
+
+
+
+## Read in ACC.csv file and transform
+## This is for ACC with incomplete X,Y,Z (Incomplete data, one or more axis not working)
+```{r}
+df <- read.csv("filepath\\ACC.csv", header=FALSE, stringsAsFactors = FALSE)
+
+    
+for (i in seq(1, (length(df)-2), 3)){  #<- changes based on length
+  
+  lengthnum = which(is.na(df))[i] - 2
+  startTime <- df[1,i]
+  secondspassed <- (which(is.na(df))[i]-2)/32
+  endtime <- startTime + secondspassed
+  Time <- as.numeric(seq(from=startTime, to=endtime, length.out=(which(is.na(df))[i]-2)))
+  C1 <- df[-c(1,2),i]
+  C1 <- C1[1:lengthnum]
+  C2 <- df[-c(1,2),i+1]
+  C2 <- C2[1:lengthnum]
+  C3 <- df[-c(1,2),i+2]
+  C3 <- C3[1:lengthnum]
+  
+  ACCdf <- data.frame(Time, C1, C2, C3)
+  colnames(ACCdf) <- c("Time", "X", "Y", "Z")
+
+  ACCdf$Time = as.POSIXct(round(as.numeric(ACCdf$Time)), origin = "1970-01-01")
+  
+  library(tidyr)
+  ACCdf = ACCdf %>% drop_na(X)
+
+  write.table(ACCdf, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}
+
+
+```
+
+## Read in EDA.csv file and transform
+```{r}
+
+df <- read.csv("filepath\\EDA.csv", header=FALSE, stringsAsFactors = FALSE)
+
+
+newrow <- rep(NaN, length.out=ncol(df))
+df <- rbind(df, newrow)
+
+  #data <- df$V9  
+EDA <- function(data){
+  E4starttime <- data[1]
+  E4 <- data[-c(1,2)]
+  E4 <- E4[1:which(is.na(data))[1]]  
+  secondspassedE4 <- which(is.na(data))[1]/data[2]
+  E4endtime <- E4starttime + secondspassedE4
+  E4Time <- as.numeric(seq(from=E4starttime, to=E4endtime, length.out=which(is.na(data))[1]))
+  
+  EDA <- data.frame(E4Time, E4)
+  colnames(EDA) <- c("Time", "EDA")
+  
+  EDA$Time = as.POSIXct(round(as.numeric(EDA$Time)), origin = "1970-01-01")
+  
+  write.table(EDA, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}
+
+apply(df, 2, EDA)
+
+```
+
+
+## Read in TEMP.csv file and transform
+```{r}
+
+df <- read.csv("filepath\\TEMP.csv", header=FALSE, stringsAsFactors = FALSE)
+
+newrow <- rep(NaN, length.out=ncol(df))
+df <- rbind(df, newrow)
+
+  #data <- df$V9  
+TEMP <- function(data){
+  E4starttime <- data[1]
+  E4 <- data[-c(1,2)]
+  E4 <- E4[1:which(is.na(data))[1]]  
+  secondspassedE4 <- which(is.na(data))[1]/data[2]
+  E4endtime <- E4starttime + secondspassedE4
+  E4Time <- as.numeric(seq(from=E4starttime, to=E4endtime, length.out=which(is.na(data))[1]))
+  
+  TEMP <- data.frame(E4Time, E4)
+  colnames(TEMP) <- c("Time", "TEMP")
+  
+  TEMP$Time = as.POSIXct(round(as.numeric(TEMP$Time)), origin = "1970-01-01")
+  
+  write.table(TEMP, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}  
+  apply(df, 2, TEMP)
+```
+
+
+## Read in BVP.csv file and transform
+```{r}
+
+  df <- read.csv("filepath\\BVP.csv", header=FALSE, stringsAsFactors = FALSE)
+
+newrow <- rep(NaN, length.out=ncol(df))
+df <- rbind(df, newrow)
+
+  data <- df$V9  
+BVP <- function(data){
+  E4starttime <- data[1]
+  E4 <- data[-c(1,2)]
+  E4 <- E4[1:which(is.na(data))[1]]  
+  secondspassedE4 <- which(is.na(data))[1]/data[2]
+  E4endtime <- E4starttime + secondspassedE4
+  E4Time <- as.numeric(seq(from=E4starttime, to=E4endtime, length.out=which(is.na(data))[1]))
+  
+  BVP <- data.frame(E4Time, E4)
+  colnames(BVP) <- c("Time", "BVP")
+  
+  BVP$Time = as.POSIXct(round(as.numeric(BVP$Time)), origin = "1970-01-01")
+  
+  write.table(BVP, file = "filename.csv", sep = ",", append = TRUE, quote = FALSE, col.names = FALSE, row.names = FALSE)
+}  
+  apply(df, 2, BVP)
+
+```
+
