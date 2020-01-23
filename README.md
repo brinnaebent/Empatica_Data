@@ -9,5 +9,5 @@ Deprecated- E4_FileFormatter for R
 
 **Use E4FileFormatter.ipynb** 
 
-**Input:** Unzipped files of raw .csv files downloaded from Empatica. (You only need to specify files)
-**Output:** Properly formatted .csv files compiled from all recordings with correct datatimestamps
+###### **Input:** Unzipped files of raw .csv files downloaded from Empatica. (You only need to specify files)
+###### **Output:** Properly formatted .csv files compiled from all recordings with correct datatimestamps
